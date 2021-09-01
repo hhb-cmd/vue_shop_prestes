@@ -2,7 +2,7 @@
   <div>
     <!-- 面包屑导航区域 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
@@ -19,7 +19,7 @@
       </el-row>
       <!-- 表格区域 -->
       <el-table
-        :data="userList" border stripe="">
+        :data="userList" border stripe>
         <el-table-column type="index" label="#"></el-table-column>
         <el-table-column prop="username" label="姓名"></el-table-column>
         <el-table-column prop="email" label="邮箱"></el-table-column>
@@ -37,9 +37,9 @@
         <el-table-column label="操作" width="190">
           <template scope="scope">
             <el-button @click="ModifyUser(scope.row.id)" type="primary" icon="el-icon-edit" size="mini"></el-button>
-            <el-button  type="danger" icon="el-icon-share" size="mini"></el-button>
-            <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button @click="removeUser(scope.row.id)" type="warning" icon="el-icon-delete" size="mini"></el-button>
+            <el-button  type="danger" icon="el-icon-delete" size="mini" @click="removeUser(scope.row.id)"></el-button>
+            <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false" >
+              <el-button  type="warning" icon="el-icon-setting" size="mini" @click="addRoles(scope.row)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -61,7 +61,7 @@
       :visible.sync="addDialogVisible"
       width="50%" @close="addDialogClose">
       <!-- 主题内容区域 -->
-      <el-form :model="usersRuleForm" :rules="usersFormRules" ref="usersRuleFormRef" label-width="80px">
+      <el-form :model="usersRuleForm"  ref="usersRuleFormRef" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="usersRuleForm.username"></el-input>
         </el-form-item>
@@ -102,6 +102,31 @@
         <!-- 按钮区域 -->
         <el-button @click="addModifyVisible = false">取 消</el-button>
         <el-button type="primary" @click="editVisible">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!-- 分配角色区域 -->
+    <el-dialog
+      title="分配角色用户"
+      :visible.sync="addRolesModifyVisible"
+      width="50%">
+      <!-- 主题内容区域 -->
+      <p>当前的用户:  {{rolesInfo.username}}</p>
+      <p>当前的角色:  {{rolesInfo.role_name}}</p>
+      <p>
+        修改角色：
+        <el-select v-model="selectrole" placeholder="请选择">
+        <el-option
+          v-for="item in rolesList"
+          :key="item.id"
+          :label="item.roleName"
+          :value="item.id">
+        </el-option>
+        </el-select>
+      </p>
+      <span slot="footer" class="dialog-footer">
+        <!-- 按钮区域 -->
+        <el-button @click="addRolesModifyVisible = false">取 消</el-button>
+        <el-button type="primary" @click="alterRoles">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -171,7 +196,15 @@ export default {
       // 控制修改用户对话框的显示与隐藏
       addModifyVisible: false,
       // 查询到的用户信息对象
-      editForm: []
+      editForm: [],
+      // 分配角色默认数据
+      rolesInfo: {},
+      // 控制分配角色对话框的显示与隐藏
+      addRolesModifyVisible: false,
+      // 分配角色默认角色列表
+      rolesList: [],
+      // select默认
+      selectrole: ''
     }
   },
   created () {
@@ -258,12 +291,31 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).catch(err => err)
-      console.log(confirmRes)
       if (confirmRes !== 'confirm') return this.$message.info('已取消删除')
       const { data: res } = await this.$http.delete('users/' + id)
       if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
       this.userData()
       this.$message.success(res.meta.msg)
+    },
+    // 点击分配按钮获取当前点击的用户数据
+    async addRoles (rolesInfo) {
+      this.rolesInfo = rolesInfo
+      this.selectroleId = rolesInfo.id
+      const { data: res } = await this.$http.get('roles')
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.rolesList = res.data
+      this.addRolesModifyVisible = true
+    },
+    // 确定分配角色
+    async alterRoles () {
+      if (!this.selectrole) return this.$message.info('请选择要修改的角色')
+      const { data: res } = await this.$http.put(`users/${this.rolesInfo.id}/role`, { rid: this.selectrole })
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.$message.success(res.meta.msg)
+      this.userData()
+      this.addRolesModifyVisible = false
+      this.selectrole = ''
+      this.rolesInfo = {}
     }
   }
 }
@@ -276,5 +328,8 @@ export default {
 }
 .el-pagination{
   margin-top: 15px;
+}
+p{
+  margin-bottom: 20px;
 }
 </style>
