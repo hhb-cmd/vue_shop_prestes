@@ -296,10 +296,10 @@ export default {
       )
 
       if (res.meta.status !== 200) {
-        return this.$message.error('删除参数失败！')
+        return this.$message.error(res.meta.msg)
       }
 
-      this.$message.success('删除参数成功！')
+      this.$message.success(res.meta.msg)
       this.getParamsDate()
     },
     // 文本框失去焦点，或摁下了 Enter 都会触发
@@ -330,10 +330,10 @@ export default {
       )
 
       if (res.meta.status !== 200) {
-        return this.$message.error('修改参数项失败！')
+        return this.$message.error(res.meta.msg)
       }
 
-      this.$message.success('修改参数项成功！')
+      this.$message.success(res.meta.msg)
     },
     // 删除对应的参数可选项
     handleClose (i, row) {
@@ -393,9 +393,5 @@ export default {
 
 .input-new-tag {
   width: 120px;
-}
-
-.el-table{
-  margin-top: 15px;
 }
 </style>

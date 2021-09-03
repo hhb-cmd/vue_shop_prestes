@@ -9,47 +9,28 @@ import Rights from '../views/power/Rights.vue'
 import Roles from '../views/power/Roles.vue'
 import Categories from '../views/goods/Categories.vue'
 import Params from '../views/goods/Params.vue'
+import GoodsList from '../views/goods/List.vue'
+import Add from '../views/goods/Add.vue'
+
 Vue.use(VueRouter)
 
 const router = new VueRouter({
   routes: [
-    {
-      path: '/',
-      redirect: '/login'
-    },
-    {
-      path: '/login',
-      component: Login
-    },
+    { path: '/', redirect: '/login' },
+    { path: '/login', component: Login },
     {
       path: '/home',
       component: Home,
       redirect: '/welcome',
       children: [
-        {
-          path: '/welcome',
-          component: Welcome
-        },
-        {
-          path: '/users',
-          component: Users
-        },
-        {
-          path: '/rights',
-          component: Rights
-        },
-        {
-          path: '/roles',
-          component: Roles
-        },
-        {
-          path: '/categories',
-          component: Categories
-        },
-        {
-          path: '/params',
-          component: Params
-        }
+        { path: '/welcome', component: Welcome },
+        { path: '/users', component: Users },
+        { path: '/rights', component: Rights },
+        { path: '/roles', component: Roles },
+        { path: '/categories', component: Categories },
+        { path: '/params', component: Params },
+        { path: '/goods', component: GoodsList },
+        { path: '/add', component: Add }
       ]
     }
   ]
